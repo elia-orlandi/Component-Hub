@@ -1,0 +1,19 @@
+<header class="app-header">
+    <div class="logo">
+      <a routerLink="/">Component Hub</a>
+    </div>
+    <nav class="user-nav">
+      @if (authService.isAuthenticated()) {
+        <div class="user-info">
+          <!-- Mostra il nome utente o l'email se il profilo è caricato -->
+          @if (authService.profile(); as profile) {
+            <span>Benvenuto, {{ profile.username || authService.user()?.email }}</span>
+          }
+          <button (click)="onSignOut()" class="logout-button">Logout</button>
+        </div>
+      } @else {
+        <!-- Eventuale link alla pagina di login, se necessario -->
+        <a routerLink="/auth/login">Login</a>
+      }
+    </nav>
+  </header>

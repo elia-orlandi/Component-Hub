@@ -1,0 +1,37 @@
+<div class="login-container">
+    <h1>Component Hub</h1>
+    <p>Accedi o registrati per continuare</p>
+  
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form">
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="tua@email.com">
+        <!-- Qui potresti aggiungere messaggi di validazione per i campi -->
+      </div>
+  
+      <div class="form-field">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="••••••••">
+      </div>
+  
+      @if (authService.state.isLoading()) {
+        <p>Caricamento...</p>
+      } @else {
+        <div class="form-actions">
+          <button type="submit" [disabled]="loginForm.invalid">Accedi</button>
+          <button type="button" (click)="onSignUp()" [disabled]="loginForm.invalid">Registrati</button>
+        </div>
+      }
+  
+      <div class="forgot-password">
+        <a href="#" (click)="$event.preventDefault(); onSendResetLink()">Password dimenticata?</a>
+      </div>
+  
+      @if (authError(); as error) {
+        <p class="error-message">{{ error }}</p>
+      }
+      @if (successMessage(); as success) {
+        <p class="success-message">{{ success }}</p>
+      }
+    </form>
+  </div>
