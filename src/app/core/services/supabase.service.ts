@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { Injectable, signal } from '@angular/core';
+import { createClient, Session, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../../environments/environment';
 
 // Importa tutti i tipi di dominio per una migliore tipizzazione del database
@@ -7,10 +7,11 @@ import { Component, ComponentCreatePayload, ComponentUpdatePayload, ComponentSta
 import { Profile, UserRole, ProfileCreatePayload, ProfileUpdatePayload } from '../models/profile.model';
 import { Tag, TagCreatePayload, TagUpdatePayload } from '../models/tag.model';
 import { Review, ReviewCreatePayload, ReviewDecision } from '../models/review.model';
+import { SessionStorageAdapter } from './storage.adapter';
 
 // Definizione del tipo di database per Supabase Client.
 // Questo rende il client fortemente tipizzato e aiuta con l'autocompletamento e gli errori a compile-time.
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       profiles: {
@@ -56,25 +57,81 @@ export interface Database {
   providedIn: 'root'
 })
 export class SupabaseService {
-  // L'istanza del client Supabase fortemente tipizzata
-  public client: SupabaseClient<Database>;
-
-  constructor() {
-    // Inizializza il client Supabase con le variabili d'ambiente.
-    // L'uso di `createClient` è l'API ufficiale (Regola #1).
-    if (!environment.supabaseUrl || !environment.supabaseKey) {
-      // Regola #7: Gestione errori robusta; non esporre raw details.
-      // In produzione, si loggherebbe a Sentry e si mostrerebbe un messaggio generico.
-      console.error('Supabase URL or Key not set in environment.ts!');
-      throw new Error('Supabase configuration missing. Cannot initialize application.');
+  private _client: SupabaseClient<Database> | null = null;
+  private authChangeCallback: ((event: string, session: Session | null) => void) | null = null;
+  private initializationPromise: Promise<void> | null = null;
+  
+  public async getClient(): Promise<SupabaseClient<Database>> {
+    if (!this.initializationPromise) {
+      // Se per qualche motivo l'inizializzazione non è partita, falla partire ora
+      this.initializeClientOnLoad();
     }
-    this.client = createClient<Database>(environment.supabaseUrl, environment.supabaseKey);
+    await this.initializationPromise;
+    return this._client!;
   }
 
-  // Puoi aggiungere metodi helper qui per query comuni,
-  // ma per l'MVP, esporre direttamente 'client' è sufficiente per la maggior parte delle operazioni.
-  // Esempio:
-  // getComponents(status: ComponentStatus = 'Approvato') {
-  //   return this.client.from('components').select('*').eq('status', status);
-  // }
+  
+  constructor() {
+    this.initializeClientOnLoad();
+  }
+
+  private initializeClientOnLoad(): void {
+    this.initializationPromise = (async () => {
+      try {
+        console.log("Avvio del controllo della sessione esistente...");
+        
+        // 1. Crea un client "sonda" solo per controllare localStorage
+        const probeClient = createClient(environment.supabaseUrl!, environment.supabaseKey!);
+        
+        // 2. Chiedi al client sonda se esiste una sessione
+        const { data: { session: persistentSession } } = await probeClient.auth.getSession();
+
+        if (persistentSession) {
+          // 3a. Se c'è una sessione, inizializza il client definitivo in modalità persistente
+          console.log("Sessione persistente trovata. Inizializzo il client in modalità localStorage.");
+          this.initializeClient(true);
+        } else {
+          // 3b. Altrimenti, controlliamo anche sessionStorage per completezza
+          const volatileProbeClient = createClient(environment.supabaseUrl!, environment.supabaseKey!, {
+            auth: { storage: SessionStorageAdapter }
+          });
+          const { data: { session: volatileSession } } = await volatileProbeClient.auth.getSession();
+          
+          if (volatileSession) {
+            console.log("Nessuna sessione persistente, ma trovata sessione volatile. Inizializzo in modalità sessionStorage.");
+            this.initializeClient(false);
+          } else {
+            console.log("Nessuna sessione trovata. Inizializzo in modalità persistente di default.");
+            this.initializeClient(true); // Default a persistente se non c'è nessuna sessione
+          }
+        }
+      } catch (error) {
+        console.error("Errore durante l'inizializzazione del client Supabase:", error);
+        this.initializeClient(true); // Fallback
+      }
+    })();
+  }
+
+  public initializeClient(persistent: boolean): void {
+    console.log(`Creazione del client con storage: ${persistent ? 'localStorage' : 'sessionStorage'}`);
+    
+    const storageOptions = persistent ? {} : { storage: SessionStorageAdapter };
+
+    this._client = createClient<Database>(
+      environment.supabaseUrl!,
+      environment.supabaseKey!,
+      { auth: { ...storageOptions, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
+    );
+
+    if (this.authChangeCallback) {
+      this._client.auth.onAuthStateChange(this.authChangeCallback);
+    }
+  }
+  
+  public onAuthStateChange(callback: (event: string, session: Session | null) => void): void {
+    this.authChangeCallback = callback;
+    if (this._client) {
+      this._client.auth.onAuthStateChange(this.authChangeCallback);
+    }
+  }
 }

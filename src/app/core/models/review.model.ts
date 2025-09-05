@@ -1,6 +1,6 @@
 export type ReviewDecision = 'Approvato' | 'Respinto';
 
-export interface Review {
+export type Review = {
   id: string; // UUID
   component_id: string; // FK a components.id
   reviewer_id: string; // FK a profiles.id

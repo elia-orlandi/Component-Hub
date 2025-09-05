@@ -3,7 +3,7 @@ export type UserRole = 'Sviluppatore' | 'Admin';
 
 // Interfaccia per il profilo utente.
 // Collega l'ID dell'utente autenticato (auth.users) al suo ruolo e username.
-export interface Profile {
+export type Profile = {
   id: string; // UUID, FK a auth.users.id
   username: string | null;
   role: UserRole;

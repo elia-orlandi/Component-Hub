@@ -3,7 +3,7 @@ export type ComponentStatus = 'In Revisione' | 'Approvato' | 'Respinto';
 
 // Interfaccia principale per un Componente.
 // Riflette fedelmente la struttura della tabella 'components' di Supabase.
-export interface Component {
+export type Component = {
   id: string; // UUID generato da Supabase
   name: string;
   readme: string | null; // Può essere NULL in DB, quindi deve esserlo anche qui

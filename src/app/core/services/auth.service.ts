@@ -3,7 +3,7 @@ import { signalState, patchState } from '@ngrx/signals';
 import { AuthState, initialState } from '../state/auth.state';
 import { User } from '@supabase/supabase-js';
 import { SupabaseService } from './supabase.service';
-import { AuthCredentials } from '../models/auth.model';
+import { AuthCredentials, SignInOptions } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -20,9 +20,11 @@ export class AuthService {
   readonly inRecoveryFlow = computed(() => this.state.inRecoveryFlow());
   readonly isInitialized = computed(() => this.state.isInitialized());
 
+  private beforeUnloadListener: (() => void) | null = null;
+
   constructor() {
     // IMPORTANTE: NON METTERE DEGLI await DENTRO AL onAuthStateChange PERCHE' POI SMINCHIA MOLTE CHIAMATE. TIPO SMINCHIAVA LA logout E LA updateUser PER LA PASSWORD
-    this.supabase.client.auth.onAuthStateChange((event, session) => {
+    this.supabase.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         console.log('Password recovery session detected. Setting recovery flag.');
         patchState(this.state, { inRecoveryFlow: true }); 
@@ -42,15 +44,20 @@ export class AuthService {
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
         patchState(this.state, { inRecoveryFlow: false }); 
       }
-
-      patchState(this.state, { session, user: session?.user ?? null });
-
-      if (!session?.user) {
-        patchState(this.state, { profile: null });
+      if (event === 'SIGNED_OUT') {
+        this.clearSessionEndListener();
+        patchState(this.state, initialState);
+        return;
       }
 
-      if (!this.state.isInitialized()) {
-        patchState(this.state, { isInitialized: true });
+      patchState(this.state, {
+        session,
+        user: session?.user ?? null,
+        isInitialized: true,
+      });
+
+      if (!session) {
+        patchState(this.state, { profile: null });
       }
     });
 
@@ -66,24 +73,21 @@ export class AuthService {
   async signUp(credentials: AuthCredentials): Promise<void> {
     patchState(this.state, { isLoading: true });
     try {
-      const { error } = await this.supabase.client.auth.signUp(credentials);
-      if (error) {
-        console.error('Error during sign-up:', error.message);
-        throw error;
-      }
+      const client = await this.supabase.getClient(); // Ottieni il client
+      const { error } = await client.auth.signUp(credentials);
+      if (error) throw error;
     } finally {
       patchState(this.state, { isLoading: false });
     }
   }
 
-  async signInWithEmail(credentials: AuthCredentials): Promise<void> {
+  async signInWithEmail(credentials: AuthCredentials, options: SignInOptions): Promise<void> {
     patchState(this.state, { isLoading: true });
     try {
-      const { error } = await this.supabase.client.auth.signInWithPassword(credentials);
-      if (error) {
-        console.error('Error during sign-in:', error.message);
-        throw error;
-      }
+      this.supabase.initializeClient(options.rememberMe);
+      const client = await this.supabase.getClient(); // Ottieni il client appena creato
+      const { error } = await client.auth.signInWithPassword(credentials);
+      if (error) throw error;
     } finally {
       patchState(this.state, { isLoading: false });
     }
@@ -92,13 +96,11 @@ export class AuthService {
   async sendPasswordResetEmail(email: string): Promise<void> {
     patchState(this.state, { isLoading: true });
     try {
-      const { error } = await this.supabase.client.auth.resetPasswordForEmail(email, {
+      const client = await this.supabase.getClient();
+      const { error } = await client.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
-      if (error) {
-        console.error('Error sending password reset email:', error.message);
-        throw error;
-      }
+      if (error) throw error;
     } finally {
       patchState(this.state, { isLoading: false });
     }
@@ -107,13 +109,9 @@ export class AuthService {
   async updatePassword(newPassword: string): Promise<void> {
     patchState(this.state, { isLoading: true });
     try {
-      const { error } = await this.supabase.client.auth.updateUser({
-        password: newPassword,
-      });
-      if (error) {
-        console.error('Error updating password:', error.message);
-        throw error;
-      }
+      const client = await this.supabase.getClient();
+      const { error } = await client.auth.updateUser({ password: newPassword });
+      if (error) throw error;
     } finally {
       patchState(this.state, { isLoading: false });
     }
@@ -122,20 +120,25 @@ export class AuthService {
   async signOut(): Promise<void> {
     patchState(this.state, { isLoading: true });
     try {
-      const { error } = await this.supabase.client.auth.signOut();
-      if (error) {
-        console.error('Error during sign-out:', error.message);
-      } else {
-        patchState(this.state, initialState);
-      }
+      const client = await this.supabase.getClient();
+      const { error } = await client.auth.signOut();
+      if (error) throw error;
     } finally {
       patchState(this.state, { isLoading: false });
     }
   }
+
+  private clearSessionEndListener(): void {
+    if (this.beforeUnloadListener) {
+      console.log("AuthService: Rimosso listener di logout.");
+      window.removeEventListener('beforeunload', this.beforeUnloadListener);
+      this.beforeUnloadListener = null;
+    }
+  }
   
   private async loadUserProfile(user: User): Promise<void> {
-    const { data, error } = await this.supabase.client
-      .from('profiles')
+    const client = await this.supabase.getClient();
+    const { data, error } = await client.from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();

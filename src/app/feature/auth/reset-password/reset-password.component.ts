@@ -2,6 +2,7 @@ import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/cor
 import { FormBuilder, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 
 // Custom validator per controllare che le password corrispondano
 export const passwordMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
@@ -22,9 +23,14 @@ export class ResetPasswordComponent {
   public authService = inject(AuthService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private errorHandler = inject(ErrorHandlerService);
 
   public formError = signal<string | null>(null);
   public successMessage = signal<string | null>(null);
+  
+  // Segnali per mostrare/nascondere password
+  public showPassword = signal<boolean>(false);
+  public showConfirmPassword = signal<boolean>(false);
 
   public resetForm = this.fb.group({
     password: ['', [Validators.required, Validators.minLength(6)]],
@@ -33,8 +39,7 @@ export class ResetPasswordComponent {
 
   async onResetPassword(): Promise<void> {
     if (this.resetForm.invalid) return;
-    this.formError.set(null);
-    this.successMessage.set(null);
+    this.clearMessages();
 
     try {
       const { password } = this.resetForm.getRawValue();
@@ -60,7 +65,21 @@ export class ResetPasswordComponent {
       }, 1000);
 
     } catch (error: any) {
-      this.formError.set(error.message || 'Si è verificato un errore.');
+      const friendlyMessage = this.errorHandler.mapSupabaseError(error);
+      this.formError.set(friendlyMessage);
     }
+  }
+
+  private clearMessages(): void {
+    this.formError.set(null);
+    this.successMessage.set(null);
+  }
+
+  public togglePasswordVisibility(): void {
+    this.showPassword.set(!this.showPassword());
+  }
+
+  public toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword.set(!this.showConfirmPassword());
   }
 }

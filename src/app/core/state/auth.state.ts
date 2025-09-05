@@ -2,7 +2,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { Profile } from '../models/profile.model';
 
 // Definisce la struttura dello stato di autenticazione
-export interface AuthState {
+export type AuthState = {
   session: Session | null;
   user: User | null;
   profile: Profile | null; // Aggiungiamo il profilo dell'utente per avere anche il suo ruolo
