@@ -1,0 +1,20 @@
+<!-- Il contenitore principale. La classe 'open' viene applicata dinamicamente. -->
+<div class="dropdown-container" [class.open]="state">
+  
+    <!-- SLOT #1: Il Trigger -->
+    <!-- Qualsiasi elemento con l'attributo `dropdown-trigger` verrà proiettato qui. -->
+    <!-- Il click su questo contenitore attiva/disattiva il dropdown. -->
+    <div class="dropdown-trigger" (click)="toggle()">
+      <ng-content select="[dropdown-trigger]"></ng-content>
+    </div>
+    
+    <!-- SLOT #2: Il Contenuto -->
+    <!-- Il contenuto del menu appare solo se il dropdown è aperto. -->
+    <!-- Usiamo il nuovo control flow @if, come da direttive. -->
+    @if (state) {
+      <!-- L'attributo `dropdown-content` definisce dove va il contenuto del menu. -->
+      <div class="dropdown-content" (click)="close()">
+        <ng-content select="[dropdown-content]"></ng-content>
+      </div>
+    }
+  </div>

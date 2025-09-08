@@ -13,26 +13,27 @@ export const routes: Routes = [
     path: 'auth/reset-password',
     loadComponent: () => import('./feature/auth/reset-password/reset-password.component').then(c => c.ResetPasswordComponent)
   },
-  // Rotte protette che usano la Shell
   {
     path: '',
     component: ShellComponent,
-    canActivate: [authGuard], // Applica la guardia a tutte le rotte figlie
+    canActivate: [authGuard],
     children: [
       {
         path: '',
-        redirectTo: 'library', // La rotta di default protetta è la libreria
+        redirectTo: 'components',
         pathMatch: 'full'
       },
       {
-        path: 'library',
-        // Lazy-load della feature 'library' (che creeremo nel prossimo step)
-        loadComponent: () => import('./feature/library/library.component').then(c => c.LibraryComponent)
+        path: 'components',
+        loadChildren: () => import('./feature/components/components.routes').then(r => r.COMPONENTS_ROUTES)
       },
-      // ... altre rotte protette qui (es. 'my-components', 'admin-dashboard')
+      {
+        path: 'my-components',
+        // In futuro, questa rotta potrà passare un dato per filtrare
+        // es: data: { filter: 'currentUser' }
+        loadChildren: () => import('./feature/components/components.routes').then(r => r.COMPONENTS_ROUTES)
+      }
     ]
   },
-
-  // Rotta di fallback
-  { path: '**', redirectTo: 'library' }
+  { path: '**', redirectTo: 'components' }
 ];

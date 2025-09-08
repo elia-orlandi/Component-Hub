@@ -1,0 +1,23 @@
+<div class="page-container">
+    <header class="page-header">
+      <h1>Libreria Componenti</h1>
+      <!-- Qui andrà una barra di ricerca -->
+    </header>
+  
+    <div class="content-grid">
+      @if (componentsService.state.isLoading()) {
+        <p>Caricamento componenti...</p>
+      } @else if (componentsService.state.error(); as error) {
+        <p class="error-message">{{ error }}</p>
+      } @else {
+        <div class="components-grid">
+          <!-- Usa @for con track, obbligatorio (Regola #4) -->
+          @for (component of componentsService.state.components(); track component.id) {
+            <app-component-card [component]="component" />
+          } @empty {
+            <p>Nessun componente trovato.</p>
+          }
+        </div>
+      }
+    </div>
+  </div>

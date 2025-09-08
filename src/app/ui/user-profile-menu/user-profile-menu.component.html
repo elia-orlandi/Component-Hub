@@ -1,0 +1,38 @@
+<!-- Utilizziamo il componente dropdown generico come contenitore -->
+<app-dropdown-menu>
+
+    <!-- #1: Definiamo cosa va nel trigger del dropdown -->
+    <div dropdown-trigger class="user-profile-trigger">
+      <!-- Icona utente SVG -->
+      <svg class="user-icon" viewBox="0 0 24 24">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+    </div>
+    
+    <!-- #2: Definiamo cosa va nel contenuto del dropdown -->
+    <ul dropdown-content class="user-menu-content">
+      
+      <!-- Mostra le informazioni dell'utente se il profilo è disponibile -->
+      @if (profile(); as p) {
+        <li class="menu-header">
+          <strong class="username">{{ p.username || user()?.email || 'Utente' }}</strong>
+          <small class="user-role">{{ p.role }}</small>
+        </li>
+        <li class="divider"></li>
+      }
+      
+      <!-- Azioni del menu -->
+      <li>
+        <a href="#" (click)="$event.preventDefault()">Il Mio Profilo</a>
+      </li>
+      <li>
+        <a href="#" (click)="$event.preventDefault()">Impostazioni</a>
+      </li>
+      <li class="divider"></li>
+      <li>
+        <!-- Il click su questo link chiama il metodo onLogout() che emette l'evento -->
+        <button type="button" (click)="onLogout()">Logout</button>
+      </li>
+    </ul>
+    
+  </app-dropdown-menu>

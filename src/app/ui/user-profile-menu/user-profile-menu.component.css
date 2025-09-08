@@ -1,0 +1,71 @@
+:host {
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Stile del trigger (l'icona utente cliccabile) */
+  .user-profile-trigger {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #f0f2f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  
+  .user-profile-trigger:hover {
+    background-color: #e4e6eb;
+  }
+  
+  /* Stile dell'icona SVG dentro il trigger */
+  .user-icon {
+    width: 20px;
+    height: 20px;
+    fill: #333;
+  }
+  
+  /*
+    Stili per il contenuto del menu.
+    Questi verranno iniettati dentro lo slot [dropdown-content].
+    La direttiva ci permette di usare `::ng-deep` se incapsulato in `:host` per stilare
+    gli elementi generati da un componente figlio, ma in questo caso non è necessario
+    perché app-dropdown-menu già prevede stili di base per link e bottoni.
+    Aggiungiamo solo stili specifici per l'header del menu e i divisori.
+  */
+  .menu-header {
+    padding: 10px 16px;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+  }
+  
+  .menu-header .username {
+    font-weight: 600;
+    color: #1c1e21;
+  }
+  
+  .menu-header .user-role {
+    font-size: 12px;
+    color: #65676b;
+  }
+  
+  .divider {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 8px 0;
+  }
+  
+  /* Stile specifico per il pulsante di logout per renderlo magari rosso */
+  .user-menu-content button {
+    width: 100%;
+    text-align: left;
+  }
+  
+  .user-menu-content button:hover {
+    color: #d32f2f; /* Colore rosso al passaggio del mouse */
+    background-color: #fbe9e7;
+  }

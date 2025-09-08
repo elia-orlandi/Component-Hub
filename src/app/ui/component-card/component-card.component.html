@@ -1,0 +1,14 @@
+<!-- Il link usa `routerLink` per navigare al dettaglio del componente -->
+<a [routerLink]="['/components', component().id]" class="card">
+    <div class="card-image-container">
+      @if (component().preview_screenshot_url) {
+        <img [src]="component().preview_screenshot_url" [alt]="component().name" class="card-image">
+      } @else {
+        <div class="card-image-placeholder">Nessuna anteprima</div>
+      }
+    </div>
+    <div class="card-content">
+      <h3 class="card-title">{{ component().name }}</h3>
+      <!-- Aggiungi qui altri dettagli come i tag -->
+    </div>
+  </a>

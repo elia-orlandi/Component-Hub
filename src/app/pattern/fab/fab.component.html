@@ -1,0 +1,13 @@
+<!-- Il pulsante FAB. (click) chiama il metodo interno. -->
+<button class="fab" (click)="onClick($event)">
+
+    <!-- SLOT: Qualsiasi contenuto passato al componente (es. un <svg>)
+         verrà renderizzato qui dentro. Questo lo rende riutilizzabile. -->
+    <ng-content></ng-content>
+
+    <!-- Mostra il tooltip solo se l'input `tooltip` è stato fornito. -->
+    @if (tooltip()) {
+    <span class="tooltip">{{ tooltip() }}</span>
+    }
+
+</button>

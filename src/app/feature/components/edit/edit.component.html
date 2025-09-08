@@ -1,0 +1,43 @@
+<div class="page-container">
+    <header class="page-header">
+      <!-- Titolo dinamico in base alla modalità -->
+      <h1>{{ isEditMode() ? 'Modifica Componente' : 'Aggiungi Nuovo Componente' }}</h1>
+    </header>
+    
+    <div class="form-container">
+      @if (componentsService.state.isLoading()) {
+        <p>Caricamento...</p>
+      } @else {
+        <form [formGroup]="componentForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label for="name">Nome Componente</label>
+            <input id="name" type="text" formControlName="name" placeholder="Es. Card Prodotto">
+          </div>
+  
+          <div class="form-group">
+            <label for="readme">Documentazione (README)</label>
+            <textarea id="readme" formControlName="readme" rows="10" placeholder="Descrivi come si usa il componente..."></textarea>
+          </div>
+  
+          <div class="form-group">
+            <label for="angular_version">Versione di Angular</label>
+            <input id="angular_version" type="text" formControlName="angular_version">
+          </div>
+  
+          <div class="form-group">
+            <label for="preview_screenshot_url">URL Screenshot</label>
+            <input id="preview_screenshot_url" type="text" formControlName="preview_screenshot_url" placeholder="URL dell'immagine di anteprima">
+          </div>
+          
+          <!-- Altri campi del form qui... -->
+  
+          <div class="form-actions">
+            <button type="button" (click)="router.navigate(['/components'])">Annulla</button>
+            <button type="submit" [disabled]="componentForm.invalid || componentsService.state.isLoading()">
+              {{ isEditMode() ? 'Salva Modifiche' : 'Crea Componente' }}
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+  </div>

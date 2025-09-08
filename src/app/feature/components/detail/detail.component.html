@@ -1,0 +1,72 @@
+<div class="page-container">
+  
+    <!-- Gestione degli stati di caricamento ed errore -->
+    @if (componentsService.state.isLoading()) {
+      <div class="loading-state">
+        <p>Caricamento del componente...</p>
+      </div>
+    } @else if (componentsService.state.error(); as error) {
+      <div class="error-state">
+        <h2>Errore</h2>
+        <p>{{ error }}</p>
+        <a routerLink="/components">Torna alla libreria</a>
+      </div>
+    } @else if (componentDetail(); as component) {
+      <!-- Stato di successo: mostra i dettagli del componente -->
+      <div class="component-detail-container">
+        <header class="page-header">
+          <h1>{{ component.name }}</h1>
+          <a [routerLink]="['/components', component.id, 'edit']" class="edit-button">Modifica</a>
+        </header>
+        
+        <div class="component-layout">
+          <!-- Colonna sinistra: Anteprima e Playground -->
+          <div class="playground-column">
+            <h2>Anteprima</h2>
+            <div class="playground">
+              @if (component.preview_screenshot_url) {
+                <img [src]="component.preview_screenshot_url" [alt]="'Anteprima di ' + component.name">
+              } @else {
+                <p>Nessuna anteprima disponibile.</p>
+              }
+            </div>
+            <!-- In futuro, qui ci sarà un vero playground interattivo -->
+          </div>
+  
+          <!-- Colonna destra: Informazioni e Codice -->
+          <div class="info-column">
+            <div class="info-section">
+              <h2>Documentazione (README)</h2>
+              <div class="readme-content">
+                <!-- Per ora mostriamo il testo semplice, in futuro potremmo renderizzare il Markdown -->
+                <pre>{{ component.readme || 'Nessuna documentazione fornita.' }}</pre>
+              </div>
+            </div>
+  
+            <div class="info-section">
+              <h2>Codice</h2>
+              <!-- Qui useremo dei tab per visualizzare HTML, TS, CSS -->
+              <div class="code-viewer">
+                <h3>HTML</h3>
+                <pre><code>{{ component.code_html || 'Codice HTML non fornito.' }}</code></pre>
+              </div>
+            </div>
+            
+            <div class="info-section">
+              <h2>Metadati</h2>
+              <ul class="metadata-list">
+                <li><strong>Versione Angular:</strong> {{ component.angular_version }}</li>
+                                <li><strong>Dipendenze:</strong>
+                  <pre><code>{{ component.dependenciesJson }}</code></pre>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <p>Nessun componente selezionato. <a routerLink="/components">Torna alla libreria</a>.</p>
+      </div>
+    }
+  </div>

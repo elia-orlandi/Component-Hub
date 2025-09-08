@@ -1,0 +1,74 @@
+/* :host assicura che il componente si comporti correttamente nel layout. */
+:host {
+    display: inline-block;
+    /* Permette al componente di essere usato inline con altri elementi. */
+    position: relative;
+    /* Contesto di posizionamento per il menu a tendina. */
+}
+
+/* Il trigger è semplicemente un contenitore per il contenuto proiettato. */
+.dropdown-trigger {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Il contenitore del menu a tendina. */
+.dropdown-content {
+    position: absolute;
+    top: calc(100% + 8px);
+    /* Posizionato sotto al trigger con un piccolo spazio. */
+    right: 0;
+    /* Allineato a destra per i menu utente. */
+    z-index: 100;
+
+    min-width: 180px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e0e0e0;
+
+    /* Animazione di entrata per un effetto più gradevole. */
+    opacity: 0;
+    transform: translateY(-10px);
+    visibility: hidden;
+    transition: opacity 150ms ease-in-out, transform 150ms ease-in-out, visibility 150ms;
+}
+
+/* Stili quando il dropdown è aperto (classe .open sul contenitore). */
+.dropdown-container.open .dropdown-content {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+/*
+::ng-deep per lo stile del contenuto proiettato.
+Come da direttiva #5, è incapsulato in :host per limitarne la portata.
+Questo ci permette di dare uno stile di base agli elementi proiettati.
+*/
+:host ::ng-deep .dropdown-content ul {
+    list-style: none;
+    padding: 8px 0;
+    margin: 0;
+}
+
+:host ::ng-deep .dropdown-content a,
+:host ::ng-deep .dropdown-content button {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    text-align: left;
+    color: #2c3e50;
+    text-decoration: none;
+    font-size: 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+:host ::ng-deep .dropdown-content a:hover,
+:host ::ng-deep .dropdown-content button:hover {
+    background-color: #f5f7fa;
+}

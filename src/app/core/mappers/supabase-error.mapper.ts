@@ -19,6 +19,7 @@ export const SUPABASE_ERROR_CODE_MAP: Record<string, string> = {
     'weak_password': 'La password è troppo debole. Prova una più complessa.',
     'rate_limit_exceeded': 'Hai superato il limite di richieste. Riprova più tardi.',
     'validation_failed': 'I dati inseriti non sono validi.',
+    'email_not_confirmed': 'Email non confermata. Controlla la tua email per confermare il tuo account.',
   };
   
   // Messaggio di fallback generico

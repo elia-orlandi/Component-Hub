@@ -1,7 +1,17 @@
-<!-- Usiamo un header (che creeremo tra poco) e il router-outlet -->
 <app-header />
 
 <main class="main-content">
-  <!-- Qui verranno caricate le feature protette come la libreria -->
   <router-outlet />
 </main>
+
+<!-- 
+  Utilizzo del componente FAB.
+  - `tooltip` viene passato come input.
+  - `(clicked)` ascolta l'output e chiama il metodo onAddComponent().
+  - L'icona SVG viene proiettata all'interno.
+-->
+<app-fab tooltip="Aggiungi Componente" (clicked)="onAddComponent()">
+  <svg viewBox="0 0 24 24">
+    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+  </svg>
+</app-fab>

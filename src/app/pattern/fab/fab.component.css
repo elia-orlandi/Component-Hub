@@ -1,0 +1,88 @@
+/*
+  :host è il selettore per l'elemento <app-fab> stesso.
+  Lo usiamo per il posizionamento fisso e per controllarne la visibilità,
+  come da direttive di stile incapsulato.
+*/
+:host {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+    
+    /* Per default è nascosto su schermi grandi */
+    display: none;
+  }
+  
+  /*
+    Media query per mostrare il FAB solo su schermi piccoli (mobile),
+    come definito nel design originale.
+  */
+  @media (max-width: 768px) {
+    :host {
+      display: block; /* Mostra il componente su mobile */
+    }
+  }
+  
+  /* Stile principale del pulsante flottante */
+  .fab {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #3498db; /* Colore primario */
+    color: white;
+    border: none;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    cursor: pointer;
+    
+    /* Allinea l'icona (proiettata via ng-content) al centro */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+  }
+  
+  .fab:hover {
+    background-color: #2980b9; /* Colore primario più scuro */
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  }
+  
+  /*
+    Stile per l'icona SVG proiettata.
+    Usiamo ::ng-deep incapsulato in :host per applicare lo stile
+    al contenuto che arriva dall'esterno.
+  */
+  :host ::ng-deep svg {
+    width: 24px;
+    height: 24px;
+    fill: white;
+  }
+  
+  /* Stile per il tooltip */
+  .tooltip {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    
+    background-color: #333;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    
+    margin-bottom: 12px;
+    
+    /* Animazione di entrata */
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none; /* Non deve essere cliccabile */
+  }
+  
+  .fab:hover .tooltip {
+    opacity: 1;
+    transform: translateY(0);
+  }

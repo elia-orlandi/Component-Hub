@@ -1,5 +1,5 @@
 import { Session, User } from '@supabase/supabase-js';
-import { Profile } from '../models/profile.model';
+import { Profile } from '../models/database.type';
 
 // Definisce la struttura dello stato di autenticazione
 export type AuthState = {

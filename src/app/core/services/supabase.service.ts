@@ -1,57 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { createClient, Session, SupabaseClient } from '@supabase/supabase-js';
 import { environment } from '../../../environments/environment';
-
-// Importa tutti i tipi di dominio per una migliore tipizzazione del database
-import { Component, ComponentCreatePayload, ComponentUpdatePayload, ComponentStatus } from '../models/component.model';
-import { Profile, UserRole, ProfileCreatePayload, ProfileUpdatePayload } from '../models/profile.model';
-import { Tag, TagCreatePayload, TagUpdatePayload } from '../models/tag.model';
-import { Review, ReviewCreatePayload, ReviewDecision } from '../models/review.model';
+import { Database } from '../models/database.type';
 import { SessionStorageAdapter } from './storage.adapter';
-
-// Definizione del tipo di database per Supabase Client.
-// Questo rende il client fortemente tipizzato e aiuta con l'autocompletamento e gli errori a compile-time.
-export type Database = {
-  public: {
-    Tables: {
-      profiles: {
-        Row: Profile;
-        Insert: ProfileCreatePayload;
-        Update: ProfileUpdatePayload;
-      };
-      components: {
-        Row: Component;
-        Insert: ComponentCreatePayload;
-        Update: ComponentUpdatePayload;
-      };
-      tags: {
-        Row: Tag;
-        Insert: TagCreatePayload;
-        Update: TagUpdatePayload;
-      };
-      reviews: {
-        Row: Review;
-        Insert: ReviewCreatePayload;
-        Update: ReviewCreatePayload; // Update è come Insert per le reviews (non si modificano dopo)
-      };
-      component_tags: { // Tabella di giunzione
-        Row: { component_id: string; tag_id: number };
-        Insert: { component_id: string; tag_id: number };
-        Update: { component_id: string; tag_id: number };
-      };
-    };
-    Enums: {
-      user_role: UserRole;
-      component_status: ComponentStatus;
-      review_decision: ReviewDecision;
-    };
-    Functions: {
-      get_my_role: {
-        Returns: UserRole;
-      };
-    };
-  };
-}
 
 @Injectable({
   providedIn: 'root'
